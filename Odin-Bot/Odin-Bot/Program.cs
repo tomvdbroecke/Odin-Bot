@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 namespace Odin_Bot {
     class Program {
         static void Main(string[] args) {
+            Console.WriteLine("Test: " + Config.bot.token);
+            Console.ReadLine();
         }
     }
 }
