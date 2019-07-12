@@ -33,5 +33,8 @@ namespace Odin_Bot {
     public struct BotConfig {
         public string token;
         public string cmdPrefix;
+        public string xivapiKey;
+        public string xivapiServer;
+        public string fcLodestoneId;
     }
 }
