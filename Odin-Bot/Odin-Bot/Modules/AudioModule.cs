@@ -22,7 +22,7 @@ namespace Odin_Bot.Modules {
             } else {
                 await _musicService.LeaveAsync(user.VoiceChannel);
                 await _musicService.ConnectAsync(user.VoiceChannel, Context.Channel as ITextChannel);
-                await Volume(Config.mem.musicVolume, false);
+                await SetVolume(Config.mem.musicVolume, false);
                 await ReplyAsync(Config.pre.success + $" Now connected to {user.VoiceChannel.Name}");
             }
         }
@@ -59,7 +59,7 @@ namespace Odin_Bot.Modules {
                 if (!isInChannel) {
                     await _musicService.LeaveAsync(user.VoiceChannel);
                     await _musicService.ConnectAsync(user.VoiceChannel, Context.Channel as ITextChannel);
-                    await Volume(Config.mem.musicVolume, false);
+                    await SetVolume(Config.mem.musicVolume, false);
                     await ReplyAsync(Config.pre.success + $" Now connected to {user.VoiceChannel.Name}");
                 }
             }
@@ -81,9 +81,14 @@ namespace Odin_Bot.Modules {
         }
 
         [Command("Volume")]
-        public async Task Volume(int vol, bool returnMesage) {
+        public async Task Volume(int vol) {
             var result = await _musicService.SetVolumeAsync(vol);
-            if (returnMesage) { await ReplyAsync(result); }
+            await ReplyAsync(result);
+        }
+
+        public async Task SetVolume(int vol, bool returnMessage) {
+            var result = await _musicService.SetVolumeAsync(vol);
+            if (returnMessage) { await ReplyAsync(result); }
         }
 
         [Command("Pause")]

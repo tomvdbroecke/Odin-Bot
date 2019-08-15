@@ -27,7 +27,8 @@ namespace Odin_Bot.Modules {
 
         [Command("info")]
         public async Task Info() {
-            await _miscService.DisplayInfoAsync(Context);
+            var result = await _miscService.DisplayInfoAsync(Context);
+            await ReplyAsync("", false, result);
         }
 
     }

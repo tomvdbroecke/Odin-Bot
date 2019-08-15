@@ -30,7 +30,7 @@ namespace Odin_Bot.Services
 
                 return info;
             } catch (Exception e) {
-                await LogAsync(new LogMessage(LogSeverity.Error, "XivApi", e));
+                await LogAsync(new LogMessage(LogSeverity.Error, "XivApi", e.ToString()));
 
                 return null;
             }

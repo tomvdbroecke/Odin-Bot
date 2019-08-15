@@ -14,7 +14,7 @@ namespace Odin_Bot.Services {
             var fields = new List<EmbedFieldBuilder>();
             fields.Add(new EmbedFieldBuilder {
                 Name = "Client Info",
-                Value = $"Current Server: Aesir - Prefix: " + Config.bot.cmdPrefix,
+                Value = $"Current Server: Aesir - Prefix: \"" + Config.bot.cmdPrefix + "\"",
                 IsInline = false
             });
             fields.Add(new EmbedFieldBuilder {

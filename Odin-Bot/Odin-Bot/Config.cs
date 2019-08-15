@@ -42,7 +42,7 @@ namespace Odin_Bot {
             if (!File.Exists(configFolder + "/" + xivConfigFile))
             {
                 xivApiConfig = new XivApiConfig();
-                string json = JsonConvert.SerializeObject(bot, Formatting.Indented);
+                string json = JsonConvert.SerializeObject(xivApiConfig, Formatting.Indented);
                 File.WriteAllText(configFolder + "/" + xivConfigFile, json);
             }
             else
@@ -55,7 +55,7 @@ namespace Odin_Bot {
             if (!File.Exists(configFolder + "/" + botMemoryFile))
             {
                 mem = new BotMemory();
-                string json = JsonConvert.SerializeObject(bot, Formatting.Indented);
+                string json = JsonConvert.SerializeObject(mem, Formatting.Indented);
                 File.WriteAllText(configFolder + "/" + botMemoryFile, json);
             }
             else
@@ -66,8 +66,8 @@ namespace Odin_Bot {
         }
 
         public async Task SaveMemory() {
-            string json = JsonConvert.SerializeObject(bot, Formatting.Indented);
-            File.WriteAllText(configFolder + "/" + configFile, json);
+            string json = JsonConvert.SerializeObject(mem, Formatting.Indented);
+            File.WriteAllText(configFolder + "/" + botMemoryFile, json);
         }
     }
 
