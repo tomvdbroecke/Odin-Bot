@@ -14,23 +14,24 @@ using Discord.Commands;
 namespace Odin_Bot {
     class Program {
         private DiscordSocketClient _client;
-        private ServiceProvider _services;
-        private Lavalink _lavaLink;
+        private CommandService _cmdService;
+        private IServiceProvider _services;
 
         // Start main as async ( StartAsync() )
         static void Main(string[] args) 
         => new Program().StartAsync().GetAwaiter().GetResult();
 
-        public async Task StartAsync() {
-            _services = ConfigureServices();
-            _client = _services.GetRequiredService<DiscordSocketClient>();
-            _lavaLink = _services.GetRequiredService<Lavalink>();
+        public async Task StartAsync(DiscordSocketClient client = null, CommandService cmdService = null) {
+            _client = client ?? new DiscordSocketClient(new DiscordSocketConfig {
+                AlwaysDownloadUsers = true,
+                MessageCacheSize = 50,
+                LogLevel = LogSeverity.Debug
+            });
 
-            // Client events
-            _lavaLink.Log += LogAsync;
-            _client.Log += LogAsync;
-            _services.GetRequiredService<CommandService>().Log += LogAsync;
-            _client.Ready += OnReadyAsync;
+            _cmdService = cmdService ?? new CommandService(new CommandServiceConfig {
+                LogLevel = LogSeverity.Verbose,
+                CaseSensitiveCommands = false
+            });
 
             // Quit if token is null or empty
             if (Config.bot.token == "" || Config.bot.token == null) return;
@@ -49,22 +50,13 @@ namespace Odin_Bot {
             //_handler = new CommandHandler(_services);
             //await _handler.InitializeAsync(_client);
 
-            await _services.GetRequiredService<CommandHandler>().InitializeAsync();
+            _services = SetupServices();
+            var cmdHandler = new CommandHandler(_client, _cmdService, _services);
+            await cmdHandler.InitializeAsync();
+
+            await _services.GetRequiredService<AudioService>().InitializeAsync();
 
             await Task.Delay(-1);
-        }
-
-        /* Used when the Client Fires the ReadyEvent. */
-        private async Task OnReadyAsync() {
-            try {
-                var node = await _lavaLink.AddNodeAsync(_client, new Configuration {
-                    Severity = LogSeverity.Info
-                });
-                node.TrackFinished += _services.GetService<AudioService>().OnFinshed;
-                await _client.SetGameAsync("Managing Aesir");
-            } catch (Exception ex) {
-                await LoggingService.LogInformationAsync(ex.Source, ex.Message);
-            }
         }
 
         /*Used whenever we want to log something to the Console. 
@@ -74,15 +66,13 @@ namespace Odin_Bot {
         }
 
         /* Configure our Services for Dependency Injection. */
-        private ServiceProvider ConfigureServices() {
-            return new ServiceCollection()
-                .AddSingleton<DiscordSocketClient>()
-                .AddSingleton<CommandService>()
-                .AddSingleton<CommandHandler>()
-                .AddSingleton<Lavalink>()
-                .AddSingleton<AudioService>()
-                .AddSingleton<BotService>()
-                .BuildServiceProvider();
-        }
+        private IServiceProvider SetupServices()
+            => new ServiceCollection()
+            .AddSingleton(_client)
+            .AddSingleton(_cmdService)
+            .AddSingleton<LavaRestClient>()
+            .AddSingleton<LavaSocketClient>()
+            .AddSingleton<AudioService>()
+            .BuildServiceProvider();
     }
 }

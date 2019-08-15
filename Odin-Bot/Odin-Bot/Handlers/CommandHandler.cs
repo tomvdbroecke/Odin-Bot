@@ -13,28 +13,21 @@ using Odin_Bot.Services;
 
 namespace Odin_Bot.Handlers {
     class CommandHandler {
-        private DiscordSocketClient _client;
-        private CommandService _commands;
+        private readonly DiscordSocketClient _client;
+        private readonly CommandService _cmdService;
         private readonly IServiceProvider _services;
 
-        /* Get Everything we need from DI. */
-        public CommandHandler(IServiceProvider services) {
-            _commands = services.GetRequiredService<CommandService>();
-            _client = services.GetRequiredService<DiscordSocketClient>();
+        public CommandHandler(DiscordSocketClient client, CommandService cmdService, IServiceProvider services) {
+            _client = client;
+            _cmdService = cmdService;
             _services = services;
-
-            _commands.CommandExecuted += CommandExecutedAsync;
-            _commands.Log += LogAsync;
-            _client.MessageReceived += HandleCommandAsync;
         }
 
         // Handle discord connection
         public async Task InitializeAsync() {
-            //_client = client;
-            //_commands = new CommandService();
-            //_client.MessageReceived += HandleCommandAsync;
-
-            await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), services: _services);
+            await _cmdService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
+            _cmdService.Log += LogAsync;
+            _client.MessageReceived += HandleCommandAsync;
         }
 
         // Handle commands
@@ -47,7 +40,7 @@ namespace Odin_Bot.Handlers {
             // Check if incoming msg is command
             int argPos = 0;
             if (msg.HasStringPrefix(Config.bot.cmdPrefix, ref argPos) || msg.HasMentionPrefix(_client.CurrentUser, ref argPos)) { /// if true -> iscommand
-                var result = await _commands.ExecuteAsync(context, argPos, _services, MultiMatchHandling.Best);
+                var result = await _cmdService.ExecuteAsync(context, argPos, _services, MultiMatchHandling.Best);
 
                 // Write any errors to console
                 if (!result.IsSuccess && result.Error != CommandError.UnknownCommand) {
