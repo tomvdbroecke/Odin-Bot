@@ -17,12 +17,13 @@ namespace Odin_Bot.Modules {
         public async Task Join() {
             var user = Context.User as SocketGuildUser;
             if (user.VoiceChannel is null) {
-                await ReplyAsync(":no_entry_sign: You need to connect to a voice channel.");
+                await ReplyAsync(Config.pre.error + " You need to connect to a voice channel.");
                 return;
             } else {
                 await _musicService.LeaveAsync(user.VoiceChannel);
                 await _musicService.ConnectAsync(user.VoiceChannel, Context.Channel as ITextChannel);
-                await ReplyAsync($":white_check_mark: Now connected to {user.VoiceChannel.Name}");
+                await Volume(Config.mem.musicVolume, false);
+                await ReplyAsync(Config.pre.success + $" Now connected to {user.VoiceChannel.Name}");
             }
         }
 
@@ -30,10 +31,10 @@ namespace Odin_Bot.Modules {
         public async Task Leave() {
             var user = Context.User as SocketGuildUser;
             if (user.VoiceChannel is null) {
-                await ReplyAsync(":no_entry_sign: Please join the channel the bot is in to make it leave.");
+                await ReplyAsync(Config.pre.error + " Please join the channel the bot is in to make it leave.");
             } else {
                 await _musicService.LeaveAsync(user.VoiceChannel);
-                await ReplyAsync($":white_check_mark: Bot has now left {user.VoiceChannel.Name}");
+                await ReplyAsync(Config.pre.success + $" Bot has now left {user.VoiceChannel.Name}");
             }
         }
 
@@ -42,7 +43,7 @@ namespace Odin_Bot.Modules {
             //Check if user is in a voice channel
             var user = Context.User as SocketGuildUser;
             if (user.VoiceChannel is null) {
-                await ReplyAsync(":no_entry_sign: You need to connect to a voice channel.");
+                await ReplyAsync(Config.pre.error + " You need to connect to a voice channel.");
                 return;
             }
             else {
@@ -58,7 +59,8 @@ namespace Odin_Bot.Modules {
                 if (!isInChannel) {
                     await _musicService.LeaveAsync(user.VoiceChannel);
                     await _musicService.ConnectAsync(user.VoiceChannel, Context.Channel as ITextChannel);
-                    await ReplyAsync($":white_check_mark: Now connected to {user.VoiceChannel.Name}");
+                    await Volume(Config.mem.musicVolume, false);
+                    await ReplyAsync(Config.pre.success + $" Now connected to {user.VoiceChannel.Name}");
                 }
             }
 
@@ -69,7 +71,7 @@ namespace Odin_Bot.Modules {
         [Command("Stop")]
         public async Task Stop() {
             await _musicService.StopAsync();
-            await ReplyAsync(":white_check_mark: Music Playback Stopped.");
+            await ReplyAsync(Config.pre.success + " Music Playback Stopped.");
         }
 
         [Command("Skip")]
@@ -79,8 +81,10 @@ namespace Odin_Bot.Modules {
         }
 
         [Command("Volume")]
-        public async Task Volume(int vol)
-            => await ReplyAsync(await _musicService.SetVolumeAsync(vol));
+        public async Task Volume(int vol, bool returnMesage) {
+            var result = await _musicService.SetVolumeAsync(vol);
+            if (returnMesage) { await ReplyAsync(result); }
+        }
 
         [Command("Pause")]
         public async Task Pause()

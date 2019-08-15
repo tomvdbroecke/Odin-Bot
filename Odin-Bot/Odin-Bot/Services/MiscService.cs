@@ -6,17 +6,15 @@ using System.Threading.Tasks;
 using Odin_Bot.Handlers;
 using System.Linq;
 using System.Collections.Generic;
-using Victoria;
 
 namespace Odin_Bot.Services {
-    public sealed class BotService {
-        public AudioService Audio { get; set; }
+    public sealed class MiscService {
 
         public async Task<Embed> DisplayInfoAsync(SocketCommandContext context) {
             var fields = new List<EmbedFieldBuilder>();
             fields.Add(new EmbedFieldBuilder {
                 Name = "Client Info",
-                Value = $"Current Server: Aesir - Prefix: ?",
+                Value = $"Current Server: Aesir - Prefix: " + Config.bot.cmdPrefix,
                 IsInline = false
             });
             fields.Add(new EmbedFieldBuilder {
@@ -31,7 +29,7 @@ namespace Odin_Bot.Services {
                 ThumbnailUrl = context.Guild.IconUrl,
                 Timestamp = DateTime.UtcNow,
                 Color = Color.DarkOrange,
-                Footer = new EmbedFooterBuilder { Text = "Powered Odin", IconUrl = context.Client.CurrentUser.GetAvatarUrl() },
+                Footer = new EmbedFooterBuilder { Text = "Powered by Odin", IconUrl = context.Client.CurrentUser.GetAvatarUrl() },
                 Fields = fields
             });
 

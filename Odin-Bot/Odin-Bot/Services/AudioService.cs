@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Odin_Bot.DataStructs;
 using Odin_Bot.Handlers;
 using Odin_Bot.Services;
 using System;
@@ -49,7 +48,7 @@ namespace Odin_Bot.Services {
 
             if (_player.IsPlaying) {
                 _player.Queue.Enqueue(track);
-                return await EmbedHandler.CreateMusicQueueEmbed(":arrow_right: " + track.Title + " added to queue :notepad_spiral:", track.Uri.ToString());
+                return await EmbedHandler.CreateMusicQueueEmbed(":arrow_right: " + track.Title + " added to queue", track.Uri.ToString());
             } else {
                 await _player.PlayAsync(track);
                 return await EmbedHandler.CreateMusicEmbed(":musical_note: Now playing " + track.Title + " :musical_note:", track.Uri.ToString());
@@ -64,48 +63,52 @@ namespace Odin_Bot.Services {
 
         public async Task<string> SkipAsync() {
             if (_player is null || _player.Queue.Items.Count() is 0)
-                return ":no_entry_sign: Nothing in queue.";
+                return Config.pre.error + " Nothing in queue.";
 
             var oldTrack = _player.CurrentTrack;
             await _player.SkipAsync();
-            return $":white_check_mark: Skipped: {oldTrack.Title} \nNow Playing: {_player.CurrentTrack.Title}";
+            return Config.pre.success + $" Skipped: {oldTrack.Title} \nNow Playing: {_player.CurrentTrack.Title}";
         }
 
         public async Task<string> SetVolumeAsync(int vol) {
             if (_player is null)
-                return ":no_entry_sign: Player isn't playing.";
+                return Config.pre.error + " Player isn't playing.";
 
             if (vol > 150 || vol <= 2) {
-                return ":no_entry_sign: Please use a number between 2 - 150";
+                return Config.pre.error + " Please use a number between 2 - 150";
             }
 
+            Config.mem.musicVolume = vol;
+            var config = new Config();
+            await config.SaveMemory();
+
             await _player.SetVolumeAsync(vol);
-            return $":white_check_mark: Volume set to: {vol}";
+            return Config.pre.success + $": Volume set to: {vol}";
         }
 
         public async Task<string> PauseOrResumeAsync() {
             if (_player is null)
-                return ":no_entry_sign: Player isn't playing.";
+                return Config.pre.error + " Player isn't playing.";
 
             if (!_player.IsPaused) {
                 await _player.PauseAsync();
-                return ":white_check_mark: Player is Paused.";
+                return Config.pre.success + " Player is Paused.";
             } else {
                 await _player.ResumeAsync();
-                return ":white_check_mark: Playback resumed.";
+                return Config.pre.success + " Playback resumed.";
             }
         }
 
         public async Task<string> ResumeAsync() {
             if (_player is null)
-                return ":no_entry_sign: Player isn't playing.";
+                return Config.pre.error + " Player isn't playing.";
 
             if (_player.IsPaused) {
                 await _player.ResumeAsync();
-                return ":white_check_mark: Playback resumed.";
+                return Config.pre.success + " Playback resumed.";
             }
 
-            return ":no_entry_sign: Player is not paused.";
+            return Config.pre.error + " Player is not paused.";
         }
 
 
@@ -118,7 +121,7 @@ namespace Odin_Bot.Services {
                 return;
 
             if (!player.Queue.TryDequeue(out var item) || !(item is LavaTrack nextTrack)) {
-                await player.TextChannel.SendMessageAsync(":no_entry_sign: There are no more tracks in the queue.");
+                await player.TextChannel.SendMessageAsync(Config.pre.success + " There are no more tracks in the queue.");
                 return;
             }
 

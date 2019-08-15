@@ -96,8 +96,7 @@ namespace Odin_Bot {
             System.Threading.Thread.Sleep(10000);
         }
 
-        /*Used whenever we want to log something to the Console. 
-            Todo: Hook in a Custom LoggingService. */
+        /*Used whenever we want to log something to the Console. */
         private async Task LogAsync(LogMessage logMessage) {
             await LoggingService.LogAsync(logMessage.Source, logMessage.Severity, logMessage.Message);
         }
@@ -110,6 +109,8 @@ namespace Odin_Bot {
             .AddSingleton<LavaRestClient>()
             .AddSingleton<LavaSocketClient>()
             .AddSingleton<AudioService>()
+            .AddSingleton<MiscService>()
+            .AddSingleton<XivApiService>()
             .BuildServiceProvider();
     }
 }

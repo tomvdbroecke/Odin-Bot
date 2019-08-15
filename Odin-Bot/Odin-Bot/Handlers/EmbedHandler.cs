@@ -57,7 +57,7 @@ namespace Odin_Bot.Handlers {
             }
         }
 
-        public static async Task<Embed> CreateMusicQueueEmbed(string title string uri)
+        public static async Task<Embed> CreateMusicQueueEmbed(string title, string uri)
         {
             bool isYt = false;
             string ytVideoId = "";

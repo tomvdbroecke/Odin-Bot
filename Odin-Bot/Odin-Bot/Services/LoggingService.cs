@@ -65,6 +65,8 @@ namespace Odin_Bot.Services {
                     return "BOTWN";
                 case "Lavalink":
                     return "LVLNK";
+                case "XivApi":
+                    return "FFAPI";
                 default:
                     return src;
             }

@@ -57,17 +57,19 @@ namespace Odin_Bot.Handlers {
             return Task.CompletedTask;
         }
 
+        /*
         public async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result) {
-            /* command is unspecified when there was a search failure (command not found); we don't care about these errors */
+            //command is unspecified when there was a search failure (command not found); we don't care about these errors
             if (!command.IsSpecified)
                 return;
 
-            /* the command was succesful, we don't care about this result, unless we want to log that a command succeeded. */
+            //the command was succesful, we don't care about this result, unless we want to log that a command succeeded.
             if (result.IsSuccess)
                 return;
 
-            /* the command failed, let's notify the user that something happened. */
+            // the command failed, let's notify the user that something happened.
             await context.Channel.SendMessageAsync($"error: {result.ToString()}");
         }
+        */
     }
 }
