@@ -38,21 +38,21 @@ namespace Odin_Bot.Services {
         public async Task LeaveAsync(SocketVoiceChannel voiceChannel)
             => await _lavaSocketClient.DisconnectAsync(voiceChannel);
 
-        public async Task<string> PlayAsync(string query, ulong guildId) {
+        public async Task<Embed> PlayAsync(string query, ulong guildId) {
             _player = _lavaSocketClient.GetPlayer(guildId);
             var results = await _lavaRestClient.SearchYouTubeAsync(query);
             if (results.LoadType == LoadType.NoMatches || results.LoadType == LoadType.LoadFailed) {
-                return "No matches found.";
+                return await EmbedHandler.CreateBasicEmbed("No Results", "Your search returned no results.", Color.Blue);
             }
 
             var track = results.Tracks.FirstOrDefault();
 
             if (_player.IsPlaying) {
                 _player.Queue.Enqueue(track);
-                return $"{track.Title} has been added to the queue.";
+                return await EmbedHandler.CreateMusicQueueEmbed(":arrow_right: " + track.Title + " added to queue :notepad_spiral:", track.Uri.ToString());
             } else {
                 await _player.PlayAsync(track);
-                return $"Now Playing: {track.Title}";
+                return await EmbedHandler.CreateMusicEmbed(":musical_note: Now playing " + track.Title + " :musical_note:", track.Uri.ToString());
             }
         }
 
@@ -64,48 +64,48 @@ namespace Odin_Bot.Services {
 
         public async Task<string> SkipAsync() {
             if (_player is null || _player.Queue.Items.Count() is 0)
-                return "Nothing in queue.";
+                return ":no_entry_sign: Nothing in queue.";
 
             var oldTrack = _player.CurrentTrack;
             await _player.SkipAsync();
-            return $"Skiped: {oldTrack.Title} \nNow Playing: {_player.CurrentTrack.Title}";
+            return $":white_check_mark: Skipped: {oldTrack.Title} \nNow Playing: {_player.CurrentTrack.Title}";
         }
 
         public async Task<string> SetVolumeAsync(int vol) {
             if (_player is null)
-                return "Player isn't playing.";
+                return ":no_entry_sign: Player isn't playing.";
 
             if (vol > 150 || vol <= 2) {
-                return "Please use a number between 2 - 150";
+                return ":no_entry_sign: Please use a number between 2 - 150";
             }
 
             await _player.SetVolumeAsync(vol);
-            return $"Volume set to: {vol}";
+            return $":white_check_mark: Volume set to: {vol}";
         }
 
         public async Task<string> PauseOrResumeAsync() {
             if (_player is null)
-                return "Player isn't playing.";
+                return ":no_entry_sign: Player isn't playing.";
 
             if (!_player.IsPaused) {
                 await _player.PauseAsync();
-                return "Player is Paused.";
+                return ":white_check_mark: Player is Paused.";
             } else {
                 await _player.ResumeAsync();
-                return "Playback resumed.";
+                return ":white_check_mark: Playback resumed.";
             }
         }
 
         public async Task<string> ResumeAsync() {
             if (_player is null)
-                return "Player isn't playing.";
+                return ":no_entry_sign: Player isn't playing.";
 
             if (_player.IsPaused) {
                 await _player.ResumeAsync();
-                return "Playback resumed.";
+                return ":white_check_mark: Playback resumed.";
             }
 
-            return "Player is not paused.";
+            return ":no_entry_sign: Player is not paused.";
         }
 
 
@@ -118,11 +118,14 @@ namespace Odin_Bot.Services {
                 return;
 
             if (!player.Queue.TryDequeue(out var item) || !(item is LavaTrack nextTrack)) {
-                await player.TextChannel.SendMessageAsync("There are no more tracks in the queue.");
+                await player.TextChannel.SendMessageAsync(":no_entry_sign: There are no more tracks in the queue.");
                 return;
             }
 
             await player.PlayAsync(nextTrack);
+
+            Embed embed = await EmbedHandler.CreateMusicEmbed(":musical_note: Now playing " + nextTrack.Title + " :musical_note:", nextTrack.Uri.ToString());
+            await player.TextChannel.SendMessageAsync(null, false, embed);
         }
 
         private Task LogAsync(LogMessage logMessage) {

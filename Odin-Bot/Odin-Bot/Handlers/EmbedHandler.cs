@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Odin_Bot.Handlers {
     public static class EmbedHandler {
@@ -25,6 +26,76 @@ namespace Odin_Bot.Handlers {
                 .WithColor(Color.DarkRed)
                 .WithCurrentTimestamp().Build());
             return embed;
+        }
+
+        public static async Task<Embed> CreateMusicEmbed(string title, string uri) {
+            bool isYt = false;
+            string ytVideoId = "";
+            if (uri.Contains("youtube.com"))
+            {
+                isYt = true;
+                var uriObj = new Uri(uri);
+                var q = HttpUtility.ParseQueryString(uriObj.Query);
+                ytVideoId = q["v"];
+            }
+
+            if (isYt) {
+                var embed = await Task.Run(() => (new EmbedBuilder()
+                    .WithTitle(title)
+                    .WithImageUrl("https://img.youtube.com/vi/" + ytVideoId + "/0.jpg")
+                    .WithUrl(uri)
+                    .WithColor(Color.Red)
+                    .WithCurrentTimestamp().Build()));
+                return embed;
+            } else {
+                var embed = await Task.Run(() => (new EmbedBuilder()
+                .WithTitle(title)
+                .WithColor(Color.Green)
+                .WithUrl(uri)
+                .WithCurrentTimestamp().Build()));
+                return embed;
+            }
+        }
+
+        public static async Task<Embed> CreateMusicQueueEmbed(string title string uri)
+        {
+            bool isYt = false;
+            string ytVideoId = "";
+            if (uri.Contains("youtube.com"))
+            {
+                isYt = true;
+                var uriObj = new Uri(uri);
+                var q = HttpUtility.ParseQueryString(uriObj.Query);
+                ytVideoId = q["v"];
+            }
+
+            if (isYt)
+            {
+                var embed = await Task.Run(() => (new EmbedBuilder()
+                    .WithTitle(title)
+                    .WithThumbnailUrl("https://img.youtube.com/vi/" + ytVideoId + "/0.jpg")
+                    .WithColor(Color.Red)
+                    .WithFields(
+                    new EmbedFieldBuilder()
+                        .WithName("Link")
+                        .WithValue("[Here](" + uri + ")")
+                    )
+                    .WithCurrentTimestamp().Build()));
+                return embed;
+            }
+            else
+            {
+                var embed = await Task.Run(() => (new EmbedBuilder()
+                .WithTitle(title)
+                .WithColor(Color.Green)
+                .WithFields(
+                    new EmbedFieldBuilder()
+                        .WithName("Link")
+                        .WithValue("[Here](" + uri + ")")
+                    )
+                .WithCurrentTimestamp().Build()));
+                return embed;
+            }
         }
     }
 }

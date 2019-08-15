@@ -63,6 +63,8 @@ namespace Odin_Bot.Services {
                     return "LAVA#";
                 case "bot":
                     return "BOTWN";
+                case "Lavalink":
+                    return "LVLNK";
                 default:
                     return src;
             }
