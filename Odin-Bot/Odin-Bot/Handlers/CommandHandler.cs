@@ -10,6 +10,7 @@ using System.Reflection;
 using Victoria;
 using Microsoft.Extensions.DependencyInjection;
 using Odin_Bot.Services;
+using Discord.Rest;
 
 namespace Odin_Bot.Handlers {
     class CommandHandler {
@@ -28,6 +29,151 @@ namespace Odin_Bot.Handlers {
             await _cmdService.AddModulesAsync(Assembly.GetEntryAssembly(), _services);
             _cmdService.Log += LogAsync;
             _client.MessageReceived += HandleCommandAsync;
+            _client.ReactionAdded += OnReactionAdded;
+            _client.ReactionRemoved += OnReactionRemoved;
+            _client.MessageDeleted += OnMessageDeleted;
+
+            await _client.SetGameAsync("with your mom");
+        }
+
+        private async Task OnMessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel) {
+            // Check if deleted message was a tracked message
+            // If so, remove from tracker and save
+            List<ulong> newTrackerList = new List<ulong>();
+            foreach (ulong id in Config.messageIdTracker) {
+                if (cache.Id != id) {
+                    newTrackerList.Add(id);
+                }
+            }
+
+            Config.messageIdTracker = newTrackerList;
+
+            var config = new Config();
+            await config.SaveMessageIdTracker();
+        }
+
+        private async Task OnReactionAdded(Cacheable<IUserMessage, ulong> cache, ISocketMessageChannel channel, SocketReaction reaction) {
+            // Check if reaction on message was a reaction on a tracked message
+            ulong eventTrackingId = 0;
+            foreach (ulong id in Config.messageIdTracker) {
+                if (reaction.MessageId == id) {
+                    eventTrackingId = id;
+                }
+            }
+
+            // Ignore bot reactions
+            if (reaction.User.Value.IsBot) {
+                return;
+            }
+
+            // Execute correct handler
+            try {
+                var message = channel.GetMessageAsync(eventTrackingId).Result as RestUserMessage;
+                var em = message.Embeds.First();
+
+                // If tracked message is an event
+                if (em.Footer.Value.ToString().Contains("Event")) {
+                    await HandleEventAsync(cache, channel, reaction, message, true);
+                }
+            } catch (Exception e) {
+                await LogAsync(new LogMessage(LogSeverity.Debug, "bot", e.ToString()));
+            }
+        }
+        private async Task OnReactionRemoved(Cacheable<IUserMessage, ulong> cache, ISocketMessageChannel channel, SocketReaction reaction) {
+            // Check if reaction on message was a reaction on a tracked message
+            ulong eventTrackingId = 0;
+            foreach (ulong id in Config.messageIdTracker) {
+                if (reaction.MessageId == id) {
+                    eventTrackingId = id;
+                }
+            }
+
+            // Ignore bot reactions
+            if (reaction.User.Value.IsBot) {
+                return;
+            }
+
+            // Execute correct handler
+            try {
+                var message = channel.GetMessageAsync(eventTrackingId).Result as RestUserMessage;
+                var em = message.Embeds.First();
+
+                // If tracked message is an event
+                if (em.Footer.Value.ToString().Contains("Event")) {
+                    await HandleEventAsync(cache, channel, reaction, message, false);
+                }
+            } catch (Exception e) {
+                await LogAsync(new LogMessage(LogSeverity.Debug, "bot", e.ToString()));
+            }
+        }
+
+        private async Task HandleEventAsync(Cacheable<IUserMessage, ulong> cache, ISocketMessageChannel channel, SocketReaction reaction, RestUserMessage message, bool reactionAdded) {
+            var em = message.Embeds.First();
+            var fields = em.Fields;
+            List<string> att = new List<string>();
+            List<string> nAtt = new List<string>();
+
+            // Iterate over fields and grab data needed
+            int maxParticipants = 0;
+            string dateTime = "";
+            for (int i = 0; i < fields.Count(); i++) {
+                if (fields[i].Name == "When?") {
+                    dateTime = fields[i].Value;
+                }
+                if (fields[i].Name == "Max Participants") {
+                    maxParticipants = Int32.Parse(fields[i].Value);
+                }
+            }
+
+            // Refresh both 'Attending' and 'Not attending' lists
+            var attending = message.GetReactionUsersAsync(new Emoji("\u2705"), 100);
+            attending.ForEach(users => {
+                for (int i = 0; i < users.Count(); i++) {
+                    if (!users.ElementAt(i).IsBot) {
+                        att.Add(users.ElementAt(i).Mention);
+                    }
+                }
+            });
+            var notAttending = message.GetReactionUsersAsync(new Emoji("\u274C"), 100);
+            notAttending.ForEach(users => {
+                for (int i = 0; i < users.Count(); i++) {
+                    if (!users.ElementAt(i).IsBot) {
+                        nAtt.Add(users.ElementAt(i).Mention);
+                    }
+                }
+            });
+
+            // If reaction was added
+            if (reactionAdded) {
+                // Check if max participants have been reached
+                if (att.Count > maxParticipants && maxParticipants != 0) {
+                    await message.RemoveReactionAsync(new Emoji("\u2705"), reaction.User.Value);
+                    return;
+                }
+
+                // Check for and handle double reactions
+                if (reaction.Emote.Equals(new Emoji("\u2705"))) {
+                    foreach (string n in nAtt) {
+                        if (n == reaction.User.Value.Mention) {
+                            await message.RemoveReactionAsync(new Emoji("\u274C"), reaction.User.Value);
+                            return;
+                        }
+                    }
+                }
+                if (reaction.Emote.Equals(new Emoji("\u274C"))) {
+                    foreach (string n in att) {
+                        if (n == reaction.User.Value.Mention) {
+                            await message.RemoveReactionAsync(new Emoji("\u2705"), reaction.User.Value);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            var embed = await EmbedHandler.UpdateEventEmbed(em.Title, em.Description, maxParticipants, dateTime, em.Footer.Value.ToString(), att, nAtt);
+            await message.ModifyAsync(q => {
+                q.Embed = embed;
+            });
         }
 
         // Handle commands
@@ -51,10 +197,8 @@ namespace Odin_Bot.Handlers {
 
         /*Used whenever we want to log something to the Console. 
             Todo: Hook in a Custom LoggingService. */
-        private Task LogAsync(LogMessage log) {
-            Console.WriteLine(log.ToString());
-
-            return Task.CompletedTask;
+        private async Task LogAsync(LogMessage logMessage) {
+            await LoggingService.LogAsync(logMessage.Source, logMessage.Severity, logMessage.Message);
         }
 
         /*

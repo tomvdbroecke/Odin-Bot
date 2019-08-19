@@ -28,7 +28,7 @@ namespace Odin_Bot.Services {
                 Title = $"Info",
                 ThumbnailUrl = context.Guild.IconUrl,
                 Timestamp = DateTime.UtcNow,
-                Color = Color.DarkOrange,
+                Color = Color.Green,
                 Footer = new EmbedFooterBuilder { Text = "Powered by Odin", IconUrl = context.Client.CurrentUser.GetAvatarUrl() },
                 Fields = fields
             });

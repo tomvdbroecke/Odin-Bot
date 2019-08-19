@@ -121,7 +121,7 @@ namespace Odin_Bot.Services {
                 return;
 
             if (!player.Queue.TryDequeue(out var item) || !(item is LavaTrack nextTrack)) {
-                await player.TextChannel.SendMessageAsync(Config.pre.success + " There are no more tracks in the queue.");
+                await player.TextChannel.SendMessageAsync(Config.pre.error + " There are no more tracks in the queue.");
                 return;
             }
 

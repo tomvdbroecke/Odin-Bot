@@ -12,11 +12,13 @@ namespace Odin_Bot {
         private const string configFile = "config.json";
         private const string xivConfigFile = "xivConfig.json";
         private const string botMemoryFile = "botMemory.json";
+        private const string messageIdFile = "messageTracking.json";
 
         public static BotConfig bot;
         public static XivApiConfig xivApiConfig;
         public static Prefixes pre;
         public static BotMemory mem;
+        public static List<ulong> messageIdTracker;
 
         // Config file constructor
         static Config() {
@@ -63,11 +65,29 @@ namespace Odin_Bot {
                 string json = File.ReadAllText(configFolder + "/" + botMemoryFile);
                 mem = JsonConvert.DeserializeObject<BotMemory>(json);
             }
+
+            /* Event Message Id Tracker */
+            if (!File.Exists(configFolder + "/" + messageIdFile)) {
+                messageIdTracker = new List<ulong>();
+                string json = JsonConvert.SerializeObject(messageIdTracker, Formatting.Indented);
+                File.WriteAllText(configFolder + "/" + messageIdFile, json);
+            } else {
+                string json = File.ReadAllText(configFolder + "/" + messageIdFile);
+                messageIdTracker = JsonConvert.DeserializeObject<List<ulong>>(json);
+                //foreach (ulong id in list) {
+                    //messageIdTracker.Add(id);
+                //}
+            }
         }
 
         public async Task SaveMemory() {
             string json = JsonConvert.SerializeObject(mem, Formatting.Indented);
             File.WriteAllText(configFolder + "/" + botMemoryFile, json);
+        }
+
+        public async Task SaveMessageIdTracker() {
+            string json = JsonConvert.SerializeObject(messageIdTracker, Formatting.Indented);
+            File.WriteAllText(configFolder + "/" + messageIdFile, json);
         }
     }
 

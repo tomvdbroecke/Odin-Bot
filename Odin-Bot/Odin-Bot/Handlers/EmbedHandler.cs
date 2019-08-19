@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using Odin_Bot;
 
 namespace Odin_Bot.Handlers {
     public static class EmbedHandler {
@@ -22,10 +23,159 @@ namespace Odin_Bot.Handlers {
         public static async Task<Embed> CreateErrorEmbed(string source, string error) {
             var embed = await Task.Run(() => new EmbedBuilder()
                 .WithTitle($"ERROR OCCURED FROM - {source}")
-                .WithDescription($"**Error Deaitls**: \n{error}")
+                .WithDescription($"**Error Details**: \n{error}")
                 .WithColor(Color.DarkRed)
                 .WithCurrentTimestamp().Build());
             return embed;
+        }
+
+        public static async Task<Embed> CreateEventEmbed(string title, string description, int maxParticipants, string dateTime, string user) {
+            if (maxParticipants == 0) {
+                var embed = await Task.Run(() => (new EmbedBuilder()
+                    .WithTitle(Utilities.UppercaseFirst(title))
+                    .WithDescription(Utilities.UppercaseFirst(description))
+                    .WithColor(Color.Green)
+                    .WithFields(
+                        new EmbedFieldBuilder()
+                            .WithName("When?")
+                            .WithValue(dateTime)
+                            .WithIsInline(false)
+                        )
+                    .WithFields(
+                        new EmbedFieldBuilder()
+                            .WithName("Attending")
+                            .WithValue("- None")
+                            .WithIsInline(true)
+                        )
+                    .WithFields(
+                        new EmbedFieldBuilder()
+                            .WithName("Not Attending")
+                            .WithValue("- None")
+                            .WithIsInline(true)
+                        )
+                    .WithFooter("Event created by " + user)
+                    .WithCurrentTimestamp().Build()));
+                return embed;
+            } else {
+                var embed = await Task.Run(() => (new EmbedBuilder()
+                    .WithTitle(Utilities.UppercaseFirst(title))
+                    .WithDescription(Utilities.UppercaseFirst(description))
+                    .WithColor(Color.Green)
+                    .WithFields(
+                        new EmbedFieldBuilder()
+                            .WithName("When?")
+                            .WithValue(dateTime)
+                            .WithIsInline(true)
+                        )
+                    .WithFields(
+                        new EmbedFieldBuilder()
+                            .WithName("Max Participants")
+                            .WithValue(maxParticipants.ToString())
+                            .WithIsInline(false)
+                        )
+                    .WithFields(
+                        new EmbedFieldBuilder()
+                            .WithName("Attending (0/" + maxParticipants.ToString() + ")")
+                            .WithValue("- None")
+                            .WithIsInline(true)
+                        )
+                    .WithFields(
+                        new EmbedFieldBuilder()
+                            .WithName("Not Attending")
+                            .WithValue("- None")
+                            .WithIsInline(true)
+                        )
+                    .WithFooter("Event created by " + user)
+                    .WithCurrentTimestamp().Build()));
+                return embed;
+            }
+        }
+
+        public static async Task<Embed> UpdateEventEmbed(string title, string description, int maxParticipants, string dateTime, string footer, List<string> attending, List<string> notAttending) {
+            string att = "";
+            for (int i = 0; i < attending.Count; i++) {
+                if (i == attending.Count -1) {
+                    att += attending[i];
+                } else {
+                    att += attending[i] + "\n";
+                }
+            }
+
+            string nAtt = "";
+            for (int i = 0; i < notAttending.Count; i++) {
+                if (i == notAttending.Count - 1) {
+                    nAtt += notAttending[i];
+                } else {
+                    nAtt += notAttending[i] + "\n";
+                }
+            }
+
+            if (att == "") {
+                att = "- None";
+            }
+            if (nAtt == "") {
+                nAtt = "- None";
+            }
+
+            if (maxParticipants == 0) {
+                var embed = await Task.Run(() => (new EmbedBuilder()
+                    .WithTitle(Utilities.UppercaseFirst(title))
+                    .WithDescription(Utilities.UppercaseFirst(description))
+                    .WithColor(Color.Green)
+                    .WithFields(
+                        new EmbedFieldBuilder()
+                            .WithName("When?")
+                            .WithValue(dateTime)
+                            .WithIsInline(false)
+                        )
+                    .WithFields(
+                        new EmbedFieldBuilder()
+                            .WithName("Attending")
+                            .WithValue(att)
+                            .WithIsInline(true)
+                        )
+                    .WithFields(
+                        new EmbedFieldBuilder()
+                            .WithName("Not Attending")
+                            .WithValue(nAtt)
+                            .WithIsInline(true)
+                        )
+                    .WithFooter(footer)
+                    .WithCurrentTimestamp().Build()));
+                return embed;
+            } else {
+                var embed = await Task.Run(() => (new EmbedBuilder()
+                    .WithTitle(Utilities.UppercaseFirst(title))
+                    .WithDescription(Utilities.UppercaseFirst(description))
+                    .WithColor(Color.Green)
+                    .WithFields(
+                        new EmbedFieldBuilder()
+                            .WithName("When?")
+                            .WithValue(dateTime)
+                            .WithIsInline(true)
+                        )
+                    .WithFields(
+                        new EmbedFieldBuilder()
+                            .WithName("Max Participants")
+                            .WithValue(maxParticipants.ToString())
+                            .WithIsInline(false)
+                        )
+                    .WithFields(
+                        new EmbedFieldBuilder()
+                            .WithName("Attending (" + attending.Count + "/" + maxParticipants.ToString() + ")")
+                            .WithValue(att)
+                            .WithIsInline(true)
+                        )
+                    .WithFields(
+                        new EmbedFieldBuilder()
+                            .WithName("Not Attending")
+                            .WithValue(nAtt)
+                            .WithIsInline(true)
+                        )
+                    .WithFooter(footer)
+                    .WithCurrentTimestamp().Build()));
+                return embed;
+            }
         }
 
         public static async Task<Embed> CreateMusicEmbed(string title, string uri) {
@@ -96,6 +246,95 @@ namespace Odin_Bot.Handlers {
                 .WithCurrentTimestamp().Build()));
                 return embed;
             }
+        }
+
+        public static async Task<Embed> CreateFcInfoEmbed(dynamic info) {
+            var embed = new EmbedBuilder();
+            embed.WithTitle(info.FreeCompany.Name.ToString() + " <" + info.FreeCompany.Tag.ToString() + ">");
+            embed.WithDescription(info.FreeCompany.Slogan.ToString());
+
+            // If GC is Maelstrom
+            if (info.FreeCompany.GrandCompany.ToString() == "Maelstrom")
+            {
+                embed.WithColor(new Color(155, 20, 39));
+                embed.WithThumbnailUrl("https://ffxiv.gamerescape.com/w/images/thumb/0/02/The_Maelstrom_Flag.png/200px-The_Maelstrom_Flag.png");
+                embed.WithImageUrl("https://ffxiv.gamerescape.com/w/images/thumb/0/02/The_Maelstrom_Flag.png/200px-The_Maelstrom_Flag.png");
+            }
+
+            // If GC is Immortal Flames
+            if (info.FreeCompany.GrandCompany.ToString() == "Immortal Flames")
+            {
+                embed.WithColor(new Color(63, 62, 47));
+                embed.WithThumbnailUrl("https://ffxiv.gamerescape.com/w/images/thumb/c/ca/The_Immortal_Flames_Flag.png/200px-The_Immortal_Flames_Flag.png");
+                embed.WithImageUrl("https://ffxiv.gamerescape.com/w/images/thumb/c/ca/The_Immortal_Flames_Flag.png/200px-The_Immortal_Flames_Flag.png");
+            }
+
+            // If GC is Order of the Twin Adder
+            if (info.FreeCompany.GrandCompany.ToString() == "Order of the Twin Adder")
+            {
+                embed.WithColor(new Color(232, 181, 22));
+                embed.WithThumbnailUrl("https://ffxiv.gamerescape.com/w/images/thumb/8/8b/The_Order_of_the_Twin_Adder_Flag.png/200px-The_Order_of_the_Twin_Adder_Flag.png");
+                embed.WithImageUrl("https://ffxiv.gamerescape.com/w/images/thumb/8/8b/The_Order_of_the_Twin_Adder_Flag.png/200px-The_Order_of_the_Twin_Adder_Flag.png");
+            }
+
+            embed.AddField("Active Members", info.FreeCompany.ActiveMemberCount.ToString(), true
+            ).Build();
+            embed.AddField("FC Rank", info.FreeCompany.Rank.ToString(), true
+            ).Build();
+            embed.AddField("Weekly Ranking", info.FreeCompany.Ranking.Weekly.ToString(), true
+            ).Build();
+            embed.AddField("Monthly Ranking", info.FreeCompany.Ranking.Monthly.ToString(), true
+            ).Build();
+            embed.AddField("Server", info.FreeCompany.Server.ToString()
+            ).Build();
+
+            embed.WithCurrentTimestamp();
+            embed.WithFooter("ID: " + info.FreeCompany.ID.ToString());
+
+            return embed.Build();
+        }
+
+        public static async Task<Embed> CreateFcMembersInfoEmbed(dynamic info) {
+            var embed = new EmbedBuilder();
+            embed.WithTitle(info.FreeCompany.Name.ToString() + " <" + info.FreeCompany.Tag.ToString() + ">");
+            embed.WithDescription(info.FreeCompany.Slogan.ToString());
+
+            // If GC is Maelstrom
+            if (info.FreeCompany.GrandCompany.ToString() == "Maelstrom")
+            {
+                embed.WithColor(new Color(155, 20, 39));
+                embed.WithThumbnailUrl("https://ffxiv.gamerescape.com/w/images/thumb/0/02/The_Maelstrom_Flag.png/200px-The_Maelstrom_Flag.png");
+            }
+
+            // If GC is Immortal Flames
+            if (info.FreeCompany.GrandCompany.ToString() == "Immortal Flames")
+            {
+                embed.WithColor(new Color(63, 62, 47));
+                embed.WithThumbnailUrl("https://ffxiv.gamerescape.com/w/images/thumb/c/ca/The_Immortal_Flames_Flag.png/200px-The_Immortal_Flames_Flag.png");
+            }
+
+            // If GC is Order of the Twin Adder
+            if (info.FreeCompany.GrandCompany.ToString() == "Order of the Twin Adder")
+            {
+                embed.WithColor(new Color(232, 181, 22));
+                embed.WithThumbnailUrl("https://ffxiv.gamerescape.com/w/images/thumb/8/8b/The_Order_of_the_Twin_Adder_Flag.png/200px-The_Order_of_the_Twin_Adder_Flag.png");
+            }
+
+            embed.AddField("Active Members", info.FreeCompany.ActiveMemberCount.ToString()
+            ).Build();
+
+            foreach (var member in info.FreeCompanyMembers)
+            {
+
+                embed.AddField(member.Name.ToString(), "**Rank:** " + member.Rank.ToString(), true)
+                .Build();
+
+            }
+
+            embed.WithCurrentTimestamp();
+            embed.WithFooter("ID: " + info.FreeCompany.ID.ToString());
+
+            return embed.Build();
         }
     }
 }

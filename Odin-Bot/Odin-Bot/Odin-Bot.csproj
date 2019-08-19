@@ -157,6 +157,7 @@
     <Compile Include="Config.cs" />
     <Compile Include="Handlers\EmbedHandler.cs" />
     <Compile Include="Modules\AudioModule.cs" />
+    <Compile Include="Modules\EventModule.cs" />
     <Compile Include="Modules\XivApiModule.cs" />
     <Compile Include="Services\AudioService.cs" />
     <Compile Include="Modules\Misc.cs" />

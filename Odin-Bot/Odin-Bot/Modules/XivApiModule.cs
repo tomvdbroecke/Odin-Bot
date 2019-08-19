@@ -10,6 +10,7 @@ using Flurl.Http;
 using System.Net.Http;
 using Newtonsoft.Json;
 using Odin_Bot.Services;
+using Odin_Bot.Handlers;
 
 namespace Odin_Bot.Modules {
     public class XivApiModule : ModuleBase<SocketCommandContext> {
@@ -20,111 +21,44 @@ namespace Odin_Bot.Modules {
         }
 
         [Command("fcinfo")]
-        public async Task Fcinfo()
-        {
+        public async Task Fcinfo() {
             dynamic info = null;
 
             // Attempt an API request for FC info
             info = await _xivApiService.FCRequest();
 
             // If FC info was succesfully grabbed
+            Embed embed = null;
             if (info != null) {
-                var embed = new EmbedBuilder();
-                embed.WithTitle(info.FreeCompany.Name.ToString() + " <" + info.FreeCompany.Tag.ToString() + ">");
-                embed.WithDescription(info.FreeCompany.Slogan.ToString());
+                embed = await EmbedHandler.CreateFcInfoEmbed(info);
+            }
 
-                // If GC is Maelstrom
-                if (info.FreeCompany.GrandCompany.ToString() == "Maelstrom")
-                {
-                    embed.WithColor(new Color(155, 20, 39));
-                    embed.WithThumbnailUrl("https://ffxiv.gamerescape.com/w/images/thumb/0/02/The_Maelstrom_Flag.png/200px-The_Maelstrom_Flag.png");
-                    embed.WithImageUrl("https://ffxiv.gamerescape.com/w/images/thumb/0/02/The_Maelstrom_Flag.png/200px-The_Maelstrom_Flag.png");
-                }
-
-                // If GC is Immortal Flames
-                if (info.FreeCompany.GrandCompany.ToString() == "Immortal Flames")
-                {
-                    embed.WithColor(new Color(63, 62, 47));
-                    embed.WithThumbnailUrl("https://ffxiv.gamerescape.com/w/images/thumb/c/ca/The_Immortal_Flames_Flag.png/200px-The_Immortal_Flames_Flag.png");
-                    embed.WithImageUrl("https://ffxiv.gamerescape.com/w/images/thumb/c/ca/The_Immortal_Flames_Flag.png/200px-The_Immortal_Flames_Flag.png");
-                }
-
-                // If GC is Order of the Twin Adder
-                if (info.FreeCompany.GrandCompany.ToString() == "Order of the Twin Adder")
-                {
-                    embed.WithColor(new Color(232, 181, 22));
-                    embed.WithThumbnailUrl("https://ffxiv.gamerescape.com/w/images/thumb/8/8b/The_Order_of_the_Twin_Adder_Flag.png/200px-The_Order_of_the_Twin_Adder_Flag.png");
-                    embed.WithImageUrl("https://ffxiv.gamerescape.com/w/images/thumb/8/8b/The_Order_of_the_Twin_Adder_Flag.png/200px-The_Order_of_the_Twin_Adder_Flag.png");
-                }
-
-                embed.AddField("Active Members", info.FreeCompany.ActiveMemberCount.ToString(), true
-                ).Build();
-                embed.AddField("FC Rank", info.FreeCompany.Rank.ToString(), true
-                ).Build();
-                embed.AddField("Weekly Ranking", info.FreeCompany.Ranking.Weekly.ToString(), true
-                ).Build();
-                embed.AddField("Monthly Ranking", info.FreeCompany.Ranking.Monthly.ToString(), true
-                ).Build();
-                embed.AddField("Server", info.FreeCompany.Server.ToString()
-                ).Build();
-
-                embed.WithCurrentTimestamp();
-                embed.WithFooter("ID: " + info.FreeCompany.ID.ToString());
-
-                await Context.Channel.SendMessageAsync("Currently in service of:", false, embed.Build());
+            // If embed was null, throw an error
+            if (embed == null) {
+                await ReplyAsync(Config.pre.error + " Could not retrieve FFXIV API information.");
+            } else {
+                await ReplyAsync("Currently in service of:", false, embed);
             }
         }
 
         [Command("fcmembers")]
-        public async Task Fcmembers()
-        {
+        public async Task Fcmembers() {
             dynamic info = null;
 
             // Attempt an API request for FC info
             info = await _xivApiService.FCRequest(true);
 
             // If FC info was succesfully grabbed
+            Embed embed = null;
             if (info != null) {
-                var embed = new EmbedBuilder();
-                embed.WithTitle(info.FreeCompany.Name.ToString() + " <" + info.FreeCompany.Tag.ToString() + ">");
-                embed.WithDescription(info.FreeCompany.Slogan.ToString());
+                embed = await EmbedHandler.CreateFcMembersInfoEmbed(info);
+            }
 
-                // If GC is Maelstrom
-                if (info.FreeCompany.GrandCompany.ToString() == "Maelstrom")
-                {
-                    embed.WithColor(new Color(155, 20, 39));
-                    embed.WithThumbnailUrl("https://ffxiv.gamerescape.com/w/images/thumb/0/02/The_Maelstrom_Flag.png/200px-The_Maelstrom_Flag.png");
-                }
-
-                // If GC is Immortal Flames
-                if (info.FreeCompany.GrandCompany.ToString() == "Immortal Flames")
-                {
-                    embed.WithColor(new Color(63, 62, 47));
-                    embed.WithThumbnailUrl("https://ffxiv.gamerescape.com/w/images/thumb/c/ca/The_Immortal_Flames_Flag.png/200px-The_Immortal_Flames_Flag.png");
-                }
-
-                // If GC is Order of the Twin Adder
-                if (info.FreeCompany.GrandCompany.ToString() == "Order of the Twin Adder")
-                {
-                    embed.WithColor(new Color(232, 181, 22));
-                    embed.WithThumbnailUrl("https://ffxiv.gamerescape.com/w/images/thumb/8/8b/The_Order_of_the_Twin_Adder_Flag.png/200px-The_Order_of_the_Twin_Adder_Flag.png");
-                }
-
-                embed.AddField("Active Members", info.FreeCompany.ActiveMemberCount.ToString()
-                ).Build();
-
-                foreach (var member in info.FreeCompanyMembers)
-                {
-
-                    embed.AddField(member.Name.ToString(), "**Rank:** " + member.Rank.ToString(), true)
-                    .Build();
-
-                }
-
-                embed.WithCurrentTimestamp();
-                embed.WithFooter("ID: " + info.FreeCompany.ID.ToString());
-
-                await Context.Channel.SendMessageAsync("", false, embed.Build());
+            // If embed was null, throw an error
+            if (embed == null) {
+                await ReplyAsync(Config.pre.error + " Could not retrieve FFXIV API information.");
+            } else {
+                await ReplyAsync("", false, embed);
             }
         }
     }
