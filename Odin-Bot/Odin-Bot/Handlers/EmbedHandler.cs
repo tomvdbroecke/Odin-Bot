@@ -53,6 +53,7 @@ namespace Odin_Bot.Handlers {
                             .WithValue("- None")
                             .WithIsInline(true)
                         )
+                    .WithThumbnailUrl("https://vignette.wikia.nocookie.net/finalfantasy/images/5/5d/FFXIV_A_Realm_Restored_trophy_icon.png")
                     .WithFooter("Event created by " + user)
                     .WithCurrentTimestamp().Build()));
                 return embed;
@@ -65,12 +66,6 @@ namespace Odin_Bot.Handlers {
                         new EmbedFieldBuilder()
                             .WithName("When?")
                             .WithValue(dateTime)
-                            .WithIsInline(true)
-                        )
-                    .WithFields(
-                        new EmbedFieldBuilder()
-                            .WithName("Max Participants")
-                            .WithValue(maxParticipants.ToString())
                             .WithIsInline(false)
                         )
                     .WithFields(
@@ -85,6 +80,7 @@ namespace Odin_Bot.Handlers {
                             .WithValue("- None")
                             .WithIsInline(true)
                         )
+                    .WithThumbnailUrl("https://vignette.wikia.nocookie.net/finalfantasy/images/5/5d/FFXIV_A_Realm_Restored_trophy_icon.png")
                     .WithFooter("Event created by " + user)
                     .WithCurrentTimestamp().Build()));
                 return embed;
@@ -140,6 +136,7 @@ namespace Odin_Bot.Handlers {
                             .WithValue(nAtt)
                             .WithIsInline(true)
                         )
+                    .WithThumbnailUrl("https://vignette.wikia.nocookie.net/finalfantasy/images/5/5d/FFXIV_A_Realm_Restored_trophy_icon.png")
                     .WithFooter(footer)
                     .WithCurrentTimestamp().Build()));
                 return embed;
@@ -152,12 +149,6 @@ namespace Odin_Bot.Handlers {
                         new EmbedFieldBuilder()
                             .WithName("When?")
                             .WithValue(dateTime)
-                            .WithIsInline(true)
-                        )
-                    .WithFields(
-                        new EmbedFieldBuilder()
-                            .WithName("Max Participants")
-                            .WithValue(maxParticipants.ToString())
                             .WithIsInline(false)
                         )
                     .WithFields(
@@ -172,6 +163,7 @@ namespace Odin_Bot.Handlers {
                             .WithValue(nAtt)
                             .WithIsInline(true)
                         )
+                    .WithThumbnailUrl("https://vignette.wikia.nocookie.net/finalfantasy/images/5/5d/FFXIV_A_Realm_Restored_trophy_icon.png")
                     .WithFooter(footer)
                     .WithCurrentTimestamp().Build()));
                 return embed;
