@@ -25,7 +25,7 @@ namespace Odin_Bot {
 
         public async Task StartAsync(DiscordSocketClient client = null, CommandService cmdService = null) {
             // Start javalink client
-            //await StartLavalink();
+            await StartLavalink();
 
             _client = client ?? new DiscordSocketClient(new DiscordSocketConfig {
                 AlwaysDownloadUsers = true,
