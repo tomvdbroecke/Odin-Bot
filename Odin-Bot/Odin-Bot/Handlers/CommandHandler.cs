@@ -33,7 +33,7 @@ namespace Odin_Bot.Handlers {
             _client.ReactionRemoved += OnReactionRemoved;
             _client.MessageDeleted += OnMessageDeleted;
 
-            await _client.SetGameAsync("with your mom");
+            await _client.SetGameAsync(Config.bot.cmdPrefix + "help");
         }
 
         private async Task OnMessageDeleted(Cacheable<IMessage, ulong> cache, ISocketMessageChannel channel) {

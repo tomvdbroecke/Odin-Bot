@@ -31,6 +31,20 @@ namespace Odin_Bot.Modules {
             await ReplyAsync("", false, result);
         }
 
+        [Command("todo")]
+        public async Task Todo() {
+            await ReplyAsync("Todo List\n" +
+                "```css\n" +
+                "- Set single bot command channel\n" +
+                "- Set moderator channel\n" +
+                "- Set moderators with moderator role\n" +
+                "- Move calendar man functionality to Odin (google calendar)\n" +
+                "- Expand event embed with 'Tentative'\n" +
+                "- Create light and full party event embeds\n" +
+                "- Log user accounts and remind moderators after 14 days in FC\n" +
+                "```");
+        }
+
         [Command("help")]
         public async Task Help([Remainder]string message = null) {
             // If no section was given
@@ -54,6 +68,7 @@ namespace Odin_Bot.Modules {
                     Config.bot.cmdPrefix + "ping (Pings the bot and returns the latency.)\n\n" +
                     Config.bot.cmdPrefix + "info (Gives info about the bot and the current server it's connected to.)\n\n" +
                     Config.bot.cmdPrefix + "help (Gives you help with bot commands.)\n\n" +
+                    Config.bot.cmdPrefix + "todo (Gives a todo list for the developer.)\n\n" +
                     "```");
                 return;
             }
