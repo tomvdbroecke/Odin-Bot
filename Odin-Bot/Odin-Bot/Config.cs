@@ -13,11 +13,13 @@ namespace Odin_Bot {
         private const string xivConfigFile = "xivConfig.json";
         private const string botMemoryFile = "botMemory.json";
         private const string messageIdFile = "messageTracking.json";
+        private const string channelsFile = "channels.json";
 
         public static BotConfig bot;
         public static XivApiConfig xivApiConfig;
         public static Prefixes pre;
         public static BotMemory mem;
+        public static Channels channels;
         public static List<ulong> messageIdTracker;
 
         // Config file constructor
@@ -78,6 +80,16 @@ namespace Odin_Bot {
                     //messageIdTracker.Add(id);
                 //}
             }
+
+            /* ChannelsConfig */
+            if (!File.Exists(configFolder + "/" + channelsFile)) {
+                channels = new Channels();
+                string json = JsonConvert.SerializeObject(channels, Formatting.Indented);
+                File.WriteAllText(configFolder + "/" + channelsFile, json);
+            } else {
+                string json = File.ReadAllText(configFolder + "/" + channelsFile);
+                channels = JsonConvert.DeserializeObject<Channels>(json);
+            }
         }
 
         public async Task SaveMemory() {
@@ -88,6 +100,11 @@ namespace Odin_Bot {
         public async Task SaveMessageIdTracker() {
             string json = JsonConvert.SerializeObject(messageIdTracker, Formatting.Indented);
             File.WriteAllText(configFolder + "/" + messageIdFile, json);
+        }
+
+        public async Task SaveChannelsConfig() {
+            string json = JsonConvert.SerializeObject(channels, Formatting.Indented);
+            File.WriteAllText(configFolder + "/" + channelsFile, json);
         }
     }
 
@@ -105,6 +122,11 @@ namespace Odin_Bot {
     public struct Prefixes {
         public string error;
         public string success;
+    }
+
+    public struct Channels {
+        public ulong[] botChannels;
+        public ulong moderatorChannel;
     }
 
     public struct BotMemory {

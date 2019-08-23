@@ -10,6 +10,7 @@ using System.Reflection;
 using Victoria;
 using Microsoft.Extensions.DependencyInjection;
 using Odin_Bot.Services;
+using Odin_Bot.Extensions;
 using Discord.Rest;
 
 namespace Odin_Bot.Handlers {
@@ -186,11 +187,33 @@ namespace Odin_Bot.Handlers {
             // Check if incoming msg is command
             int argPos = 0;
             if (msg.HasStringPrefix(Config.bot.cmdPrefix, ref argPos) || msg.HasMentionPrefix(_client.CurrentUser, ref argPos)) { /// if true -> iscommand
-                var result = await _cmdService.ExecuteAsync(context, argPos, _services, MultiMatchHandling.Best);
+                // Check channel
+                bool IsOwner = await PermissionService.IsOwner((SocketGuildUser)context.User);
+                bool IsValidChannel = false;
+                
+                // Check if current channel is valid
+                if (Config.channels.botChannels != null) {
+                    if (Config.channels.botChannels.Contains(context.Channel.Id)) {
+                        IsValidChannel = true;
+                    }
+                }
 
-                // Write any errors to console
-                if (!result.IsSuccess && result.Error != CommandError.UnknownCommand) {
-                    Console.WriteLine(result.ErrorReason);
+                // If Is owner or Channel is valid [OR IF MESSAGE IS EXCLUDED EG BOTCHANNEL COMMAND]
+                if (IsOwner || IsValidChannel || msg.Content == ".botchannel") {
+                    // Handle command if in correct channel
+                    var result = await _cmdService.ExecuteAsync(context, argPos, _services, MultiMatchHandling.Best);
+
+                    // Write any errors to console
+                    if (!result.IsSuccess && result.Error != CommandError.UnknownCommand) {
+                        Console.WriteLine(result.ErrorReason);
+                    }
+
+                    return;
+                }
+
+                // Check if there are any valid channels (botchannels)
+                if (Config.channels.botChannels.IsNullOrEmpty() && !IsOwner) {
+                    await msg.Channel.SendMessageAsync(Config.pre.error + " The Bot's useable channels have not yet been configured. Please use `" + Config.bot.cmdPrefix + "botchannel` in a channel you would like to add to the Bot's useable channels.");
                 }
             }
         }
