@@ -200,7 +200,7 @@ namespace Odin_Bot.Handlers {
                 }
 
                 // If Is owner or moderator or Channel is valid [OR IF MESSAGE IS EXCLUDED EG BOTCHANNEL COMMAND]
-                if (IsOwner || IsModerator|| IsValidChannel || msg.Content == Config.bot.cmdPrefix + "botchannel") {
+                if (IsOwner || IsModerator || IsValidChannel || msg.Content == Config.bot.cmdPrefix + "botchannel") {
                     // Handle command if in correct channel
                     var result = await _cmdService.ExecuteAsync(context, argPos, _services, MultiMatchHandling.Best);
 
