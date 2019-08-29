@@ -100,6 +100,10 @@ namespace Odin_Bot.Modules {
             // Set new moderatorchannel
             Config.channels.moderatorChannel = Context.Channel.Id;
             await Context.Channel.SendMessageAsync(Config.pre.success + " The channel <#" + Context.Channel.Id + "> is now the moderator channel.");
+
+            // Save config
+            var config = new Config();
+            await config.SaveChannelsConfig();
         }
     }
 }
