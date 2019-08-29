@@ -23,7 +23,7 @@ namespace Odin_Bot.Services {
                 return false;
             }    
 
-            foreach (var i in Config.roles.moderators) {
+            foreach (ulong i in Config.roles.moderators) {
                 foreach (var r in user.Roles) {
                     if (r.Id == i) {
                         return true;
