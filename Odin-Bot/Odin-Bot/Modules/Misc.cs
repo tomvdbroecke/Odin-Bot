@@ -35,9 +35,6 @@ namespace Odin_Bot.Modules {
         public async Task Todo() {
             await ReplyAsync("Todo List\n" +
                 "```css\n" +
-                "- Set single bot command channel\n" +
-                "- Set moderator channel\n" +
-                "- Set moderators with moderator role\n" +
                 "- Move calendar man functionality to Odin (google calendar)\n" +
                 "- Expand event embed with 'Tentative'\n" +
                 "- Create light and full party event embeds\n" +

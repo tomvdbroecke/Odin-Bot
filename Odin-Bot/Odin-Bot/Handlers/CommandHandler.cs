@@ -189,6 +189,7 @@ namespace Odin_Bot.Handlers {
             if (msg.HasStringPrefix(Config.bot.cmdPrefix, ref argPos) || msg.HasMentionPrefix(_client.CurrentUser, ref argPos)) { /// if true -> iscommand
                 // Check channel
                 bool IsOwner = await PermissionService.IsOwner((SocketGuildUser)context.User);
+                bool IsModerator = await PermissionService.IsModerator((SocketGuildUser)context.User);
                 bool IsValidChannel = false;
                 
                 // Check if current channel is valid
@@ -198,8 +199,8 @@ namespace Odin_Bot.Handlers {
                     }
                 }
 
-                // If Is owner or Channel is valid [OR IF MESSAGE IS EXCLUDED EG BOTCHANNEL COMMAND]
-                if (IsOwner || IsValidChannel || msg.Content == ".botchannel") {
+                // If Is owner or moderator or Channel is valid [OR IF MESSAGE IS EXCLUDED EG BOTCHANNEL COMMAND]
+                if (IsOwner || IsModerator|| IsValidChannel || msg.Content == Config.bot.cmdPrefix + "botchannel") {
                     // Handle command if in correct channel
                     var result = await _cmdService.ExecuteAsync(context, argPos, _services, MultiMatchHandling.Best);
 

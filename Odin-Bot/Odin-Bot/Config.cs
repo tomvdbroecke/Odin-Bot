@@ -14,12 +14,14 @@ namespace Odin_Bot {
         private const string botMemoryFile = "botMemory.json";
         private const string messageIdFile = "messageTracking.json";
         private const string channelsFile = "channels.json";
+        private const string rolesFile = "roles.json";
 
         public static BotConfig bot;
         public static XivApiConfig xivApiConfig;
         public static Prefixes pre;
         public static BotMemory mem;
         public static Channels channels;
+        public static Roles roles;
         public static List<ulong> messageIdTracker;
 
         // Config file constructor
@@ -90,6 +92,16 @@ namespace Odin_Bot {
                 string json = File.ReadAllText(configFolder + "/" + channelsFile);
                 channels = JsonConvert.DeserializeObject<Channels>(json);
             }
+
+            /* RolesConfig */
+            if (!File.Exists(configFolder + "/" + rolesFile)) {
+                roles = new Roles();
+                string json = JsonConvert.SerializeObject(roles, Formatting.Indented);
+                File.WriteAllText(configFolder + "/" + rolesFile, json);
+            } else {
+                string json = File.ReadAllText(configFolder + "/" + rolesFile);
+                roles = JsonConvert.DeserializeObject<Roles>(json);
+            }
         }
 
         public async Task SaveMemory() {
@@ -105,6 +117,11 @@ namespace Odin_Bot {
         public async Task SaveChannelsConfig() {
             string json = JsonConvert.SerializeObject(channels, Formatting.Indented);
             File.WriteAllText(configFolder + "/" + channelsFile, json);
+        }
+
+        public async Task SaveRolesConfig() {
+            string json = JsonConvert.SerializeObject(roles, Formatting.Indented);
+            File.WriteAllText(configFolder + "/" + rolesFile, json);
         }
     }
 
@@ -127,6 +144,10 @@ namespace Odin_Bot {
     public struct Channels {
         public ulong[] botChannels;
         public ulong moderatorChannel;
+    }
+
+    public struct Roles {
+        public ulong[] moderators;
     }
 
     public struct BotMemory {
