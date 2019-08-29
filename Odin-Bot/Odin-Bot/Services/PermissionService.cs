@@ -24,9 +24,8 @@ namespace Odin_Bot.Services {
             }    
 
             foreach (var i in Config.roles.moderators) {
-                var result = user.Guild.GetRole(i);
-                if (result != null) {
-                    if (result.Id == i) {
+                foreach (var r in user.Roles) {
+                    if (r.Id == i) {
                         return true;
                     }
                 }
