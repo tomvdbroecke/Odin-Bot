@@ -54,6 +54,8 @@ namespace Odin_Bot.Modules {
                     "- ffxiv\n" +
                     "- music\n" +
                     "- events\n" +
+                    "- fun\n" +
+                    "- moderator\n" +
                     "```");
                 return;
             }
@@ -103,6 +105,30 @@ namespace Odin_Bot.Modules {
                     Config.bot.cmdPrefix + "event [TITLE];[DESCRIPTION];[DATE+TIME];[MAX SIGNUPS (OPTIONAL)] (Creates an event in the current channel.)\n\n" +
                     Config.bot.cmdPrefix + "lightpartyevent [TITLE];[DESCRIPTION];[DATE+TIME] (Creates a light party event in the current channel. Signups are split as follows: 1 Tank, 1 Healer, 2 DPS.) {NOT CURRENTLY IMPLEMENTED}\n\n" +
                     Config.bot.cmdPrefix + "fullpartyevent [TITLE];[DESCRIPTION];[DATE+TIME] (Creates a full party event in the current channel. Signups are split as follows: 2 Tanks, 2 Healers, 4 DPS.) {NOT CURRENTLY IMPLEMENTED}\n\n" +
+                    "```");
+                return;
+            }
+
+            // If section is fun
+            if (message == "fun") {
+                await ReplyAsync("**Fun Help**\n" +
+                    "```css\n" +
+                    Config.bot.cmdPrefix + "beans (Tells you the amount of beans you've acquired.)\n\n" +
+                    "```");
+                return;
+            }
+
+            // If section is moderator
+            if (message == "events") {
+                // REQUIRE MODERATOR
+                if (!await PermissionService.RequireModerator(Context))
+                    return;
+
+                await ReplyAsync("**Moderator Help**\n" +
+                    "```css\n" +
+                    Config.bot.cmdPrefix + "botchannel (Toggles the Bot's permission to use the current channel.)\n\n" +
+                    Config.bot.cmdPrefix + "moderatorchannel (Sets the current channel as the moderator channel.) {Owner Only}\n\n" +
+                    Config.bot.cmdPrefix + "moderatorrole [MENTION ROLE] (Toggles the mentioned role as a moderator role.) {Owner Only}\n\n" +
                     "```");
                 return;
             }

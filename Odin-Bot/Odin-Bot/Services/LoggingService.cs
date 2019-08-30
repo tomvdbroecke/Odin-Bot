@@ -67,6 +67,8 @@ namespace Odin_Bot.Services {
                     return "LVLNK";
                 case "XivApi":
                     return "FFAPI";
+                case "Scheduler":
+                    return "SCHDR";
                 default:
                     return src;
             }

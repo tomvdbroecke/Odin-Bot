@@ -17,6 +17,7 @@ namespace Odin_Bot {
     class Program {
         private DiscordSocketClient _client;
         private CommandService _cmdService;
+        private SchedulerService _scheduler;
         private IServiceProvider _services;
 
         // Start main as async ( StartAsync() )
@@ -65,6 +66,10 @@ namespace Odin_Bot {
 
             await _services.GetRequiredService<AudioService>().InitializeAsync();
 
+            // Start and asign scheduler
+            await StartScheduler();
+            _scheduler = new SchedulerService(new XivApiService());
+
             await Task.Delay(-1);
         }
 
@@ -96,6 +101,29 @@ namespace Odin_Bot {
             System.Threading.Thread.Sleep(10000);
         }
 
+        private async Task StartScheduler() {
+            // Find nearest hour
+            DateTime now = DateTime.Now;
+            DateTime roundedNow = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0);
+            if (now.Minute > 0 || now.Second > 0)
+                roundedNow = roundedNow.AddHours(1);
+
+            // Every hour (starts from next full hour)
+            Scheduler.IntervalInHours(roundedNow.Hour, 00, 1, async () => {
+                await LogAsync(new LogMessage(LogSeverity.Info, "Scheduler", "Hourly scheduler fired."));
+
+                // Hourly functions
+            });
+
+            // Every day (starts from next day at 11:29 PM)
+            Scheduler.IntervalInDays(23, 59, 1, async () => {
+                await LogAsync(new LogMessage(LogSeverity.Info, "Scheduler", "Daily scheduler fired."));
+
+                // Daily functions
+                await _scheduler.DailyModeratorReport(_client);
+            });
+        }
+
         /*Used whenever we want to log something to the Console. */
         private async Task LogAsync(LogMessage logMessage) {
             await LoggingService.LogAsync(logMessage.Source, logMessage.Severity, logMessage.Message);
@@ -111,6 +139,7 @@ namespace Odin_Bot {
             .AddSingleton<AudioService>()
             .AddSingleton<MiscService>()
             .AddSingleton<XivApiService>()
+            .AddSingleton<SchedulerService>()
             .BuildServiceProvider();
     }
 }

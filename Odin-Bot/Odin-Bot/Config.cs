@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 namespace Odin_Bot {
     class Config {
         private const string configFolder = "Resources";
+
         private const string configFile = "config.json";
         private const string xivConfigFile = "xivConfig.json";
         private const string botMemoryFile = "botMemory.json";
@@ -30,7 +31,7 @@ namespace Odin_Bot {
             pre.error = ":no_entry_sign:";
             pre.success = ":white_check_mark:";
 
-            // Create directory if it doesn't exist
+            // Create resources directory if it doesn't exist
             if (!Directory.Exists(configFolder)) Directory.CreateDirectory(configFolder);
 
             // Create file as json if it doesn't exist, read json file if it does exist
