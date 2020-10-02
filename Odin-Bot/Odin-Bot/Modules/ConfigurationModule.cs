@@ -43,6 +43,21 @@ namespace Odin_Bot.Modules {
             await config.SaveChannelsConfig();
         }
 
+        [Command("eventannouncementchannel")]
+        public async Task Eventannouncementchannel() {
+            // REQUIRE MODERATOR
+            if (!await PermissionService.RequireModerator(Context))
+                return;
+
+            // Set new eventannouncementchannel
+            Config.channels.eventAnnouncementChannel = Context.Channel.Id;
+            await Context.Channel.SendMessageAsync(Config.pre.success + " The channel <#" + Context.Channel.Id + "> is now the event announcement channel.");
+
+            // Save config
+            var config = new Config();
+            await config.SaveChannelsConfig();
+        }
+
         [Command("moderatorrole")]
         public async Task Moderatorrole(string param) {
             // REQUIRE OWNER

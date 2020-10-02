@@ -35,10 +35,7 @@ namespace Odin_Bot.Modules {
         public async Task Todo() {
             await ReplyAsync("Todo List\n" +
                 "```css\n" +
-                "- Move calendar man functionality to Odin (google calendar)\n" +
-                "- Expand event embed with 'Tentative'\n" +
-                "- Create light and full party event embeds\n" +
-                "- Log user accounts and remind moderators after 14 days in FC\n" +
+                "- Automatically add events to the calendar and ping participants\n" +
                 "```");
         }
 
@@ -67,6 +64,7 @@ namespace Odin_Bot.Modules {
                     Config.bot.cmdPrefix + "ping (Pings the bot and returns the latency.)\n\n" +
                     Config.bot.cmdPrefix + "info (Gives info about the bot and the current server it's connected to.)\n\n" +
                     Config.bot.cmdPrefix + "help (Gives you help with bot commands.)\n\n" +
+                    Config.bot.cmdPrefix + "time (Shows you the current system time.)\n\n" +
                     Config.bot.cmdPrefix + "todo (Gives a todo list for the developer.)\n\n" +
                     "```");
                 return;
@@ -78,6 +76,7 @@ namespace Odin_Bot.Modules {
                     "```css\n" +
                     Config.bot.cmdPrefix + "fcinfo (Gives information about the FC.)\n\n" +
                     Config.bot.cmdPrefix + "fcmembers (Shows all FC members and their roles.)\n\n" +
+                    Config.bot.cmdPrefix + "serverstatus [DATA CENTER] (Shows FFXIV server status per data center. If no data center is given, a list of data centers will be displayed.)\n\n" +
                     "```");
                 return;
             }
@@ -103,8 +102,8 @@ namespace Odin_Bot.Modules {
                 await ReplyAsync("**Event Help**\n" +
                     "```css\n" +
                     Config.bot.cmdPrefix + "event [TITLE];[DESCRIPTION];[DATE+TIME];[MAX SIGNUPS (OPTIONAL)] (Creates an event in the current channel.)\n\n" +
-                    Config.bot.cmdPrefix + "lightpartyevent [TITLE];[DESCRIPTION];[DATE+TIME] (Creates a light party event in the current channel. Signups are split as follows: 1 Tank, 1 Healer, 2 DPS.) {NOT CURRENTLY IMPLEMENTED}\n\n" +
-                    Config.bot.cmdPrefix + "fullpartyevent [TITLE];[DESCRIPTION];[DATE+TIME] (Creates a full party event in the current channel. Signups are split as follows: 2 Tanks, 2 Healers, 4 DPS.) {NOT CURRENTLY IMPLEMENTED}\n\n" +
+                    Config.bot.cmdPrefix + "lightpartyevent [TITLE];[DESCRIPTION];[DATE+TIME] (Creates a light party event in the current channel. Signups are split as follows: 1 Tank, 1 Healer, 2 DPS.)\n\n" +
+                    Config.bot.cmdPrefix + "fullpartyevent [TITLE];[DESCRIPTION];[DATE+TIME] (Creates a full party event in the current channel. Signups are split as follows: 2 Tanks, 2 Healers, 4 DPS.)\n\n" +
                     "```");
                 return;
             }
@@ -114,6 +113,10 @@ namespace Odin_Bot.Modules {
                 await ReplyAsync("**Fun Help**\n" +
                     "```css\n" +
                     Config.bot.cmdPrefix + "beans (Tells you the amount of beans you've acquired.)\n\n" +
+                    Config.bot.cmdPrefix + "getbeans (Asks Odin for beans, be sure not to push him too much...)\n\n" +
+                    Config.bot.cmdPrefix + "beanchance (Tells you how much % chance you have to get more beans today.)\n\n" +
+                    Config.bot.cmdPrefix + "beansleaderboard (Shows you the top 10 people with the most beans.)\n\n" +
+                    Config.bot.cmdPrefix + "birb (Shows you a bird.)\n\n" +
                     "```");
                 return;
             }
@@ -126,6 +129,7 @@ namespace Odin_Bot.Modules {
 
                 await ReplyAsync("**Moderator Help**\n" +
                     "```css\n" +
+                    Config.bot.cmdPrefix + "displaycalendar (Displays a guild calendar.)\n\n" +
                     Config.bot.cmdPrefix + "botchannel (Toggles the Bot's permission to use the current channel.)\n\n" +
                     Config.bot.cmdPrefix + "moderatorchannel (Sets the current channel as the moderator channel.) {Owner Only}\n\n" +
                     Config.bot.cmdPrefix + "moderatorrole [MENTION ROLE] (Toggles the mentioned role as a moderator role.) {Owner Only}\n\n" +
@@ -141,8 +145,22 @@ namespace Odin_Bot.Modules {
                     "- ffxiv\n" +
                     "- music\n" +
                     "- events\n" +
+                    "- fun\n" +
+                    "- moderator\n" +
                     "```");
             return;
+        }
+
+        [Command("avatar")]
+        public async Task Avatar(string query) {
+            var user = Context.Message.MentionedUsers.First();
+            string[] str = user.GetAvatarUrl().Split('?');
+            await ReplyAsync(str[0]);
+        }
+
+        [Command("time")]
+        public async Task Time() {
+            await ReplyAsync("Current system time is `" + DateTime.Now.ToString("HH:mm") + "`");
         }
 
     }

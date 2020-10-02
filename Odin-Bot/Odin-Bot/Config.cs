@@ -14,6 +14,7 @@ namespace Odin_Bot {
         private const string xivConfigFile = "xivConfig.json";
         private const string botMemoryFile = "botMemory.json";
         private const string messageIdFile = "messageTracking.json";
+        private const string calendarIdFile = "calendarTracking.json";
         private const string channelsFile = "channels.json";
         private const string rolesFile = "roles.json";
 
@@ -24,6 +25,7 @@ namespace Odin_Bot {
         public static Channels channels;
         public static Roles roles;
         public static List<ulong> messageIdTracker;
+        public static List<ulong> calendarIdTracker;
 
         // Config file constructor
         static Config() {
@@ -79,9 +81,16 @@ namespace Odin_Bot {
             } else {
                 string json = File.ReadAllText(configFolder + "/" + messageIdFile);
                 messageIdTracker = JsonConvert.DeserializeObject<List<ulong>>(json);
-                //foreach (ulong id in list) {
-                    //messageIdTracker.Add(id);
-                //}
+            }
+
+            /* Calendar Message Id Tracker */
+            if (!File.Exists(configFolder + "/" + calendarIdFile)) {
+                calendarIdTracker = new List<ulong>();
+                string json = JsonConvert.SerializeObject(calendarIdTracker, Formatting.Indented);
+                File.WriteAllText(configFolder + "/" + calendarIdFile, json);
+            } else {
+                string json = File.ReadAllText(configFolder + "/" + calendarIdFile);
+                calendarIdTracker = JsonConvert.DeserializeObject<List<ulong>>(json);
             }
 
             /* ChannelsConfig */
@@ -114,6 +123,10 @@ namespace Odin_Bot {
             string json = JsonConvert.SerializeObject(messageIdTracker, Formatting.Indented);
             File.WriteAllText(configFolder + "/" + messageIdFile, json);
         }
+        public async Task SaveCalendarIdTracker() {
+            string json = JsonConvert.SerializeObject(calendarIdTracker, Formatting.Indented);
+            File.WriteAllText(configFolder + "/" + calendarIdFile, json);
+        }
 
         public async Task SaveChannelsConfig() {
             string json = JsonConvert.SerializeObject(channels, Formatting.Indented);
@@ -145,6 +158,7 @@ namespace Odin_Bot {
     public struct Channels {
         public ulong[] botChannels;
         public ulong moderatorChannel;
+        public ulong eventAnnouncementChannel;
     }
 
     public struct Roles {

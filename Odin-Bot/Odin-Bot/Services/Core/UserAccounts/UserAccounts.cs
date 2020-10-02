@@ -43,12 +43,17 @@ namespace Odin_Bot.Services.Core.UserAccounts {
             var newAccount = new UserAccount() {
                 UserId = id,
                 Beans = 0,
+                HasAskedForBeans = 0,
                 XivCharId = 0
             };
 
             accounts.Add(newAccount);
             SaveAccounts();
             return newAccount;
+        }
+
+        public static List<UserAccount> GetAllUserAccounts() {
+            return accounts;
         }
     }
 }

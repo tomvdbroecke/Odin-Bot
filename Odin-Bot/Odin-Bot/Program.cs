@@ -19,6 +19,7 @@ namespace Odin_Bot {
         private CommandService _cmdService;
         private SchedulerService _scheduler;
         private IServiceProvider _services;
+        private CommandHandler _cmdHandler;
 
         // Start main as async ( StartAsync() )
         static void Main(string[] args) 
@@ -61,14 +62,15 @@ namespace Odin_Bot {
             //await _handler.InitializeAsync(_client);
 
             _services = SetupServices();
-            var cmdHandler = new CommandHandler(_client, _cmdService, _services);
-            await cmdHandler.InitializeAsync();
+            _cmdHandler = new CommandHandler(_client, _cmdService, _services);
+            await _cmdHandler.InitializeAsync();
 
             await _services.GetRequiredService<AudioService>().InitializeAsync();
 
             // Start and asign scheduler
             await StartScheduler();
-            _scheduler = new SchedulerService(new XivApiService());
+            _scheduler = new SchedulerService(new XivApiService(), new CalendarService());
+            _scheduler.HourlyCalendarUpdate(_client);
 
             await Task.Delay(-1);
         }
@@ -104,15 +106,28 @@ namespace Odin_Bot {
         private async Task StartScheduler() {
             // Find nearest hour
             DateTime now = DateTime.Now;
-            DateTime roundedNow = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0);
-            if (now.Minute > 0 || now.Second > 0)
+            DateTime roundedNow = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
+            if (now.Minute > 0 || now.Second > 0) {
                 roundedNow = roundedNow.AddHours(1);
+                roundedNow = roundedNow.AddMinutes(1);
+            }
+
+            // Every minute (full minutes)
+            Scheduler.IntervalInMinutes(roundedNow.Hour - 1, roundedNow.Minute, 1, async () => {
+                await LogAsync(new LogMessage(LogSeverity.Info, "Scheduler", "60 Second checks fired."));
+
+                // 60 second functions
+                await _cmdHandler.ClearCommandsInLastMinute();
+                await _scheduler.AnnounceEvents(_client);
+                await _scheduler.SetRandomGame(_client);
+            });
 
             // Every hour (starts from next full hour)
-            Scheduler.IntervalInHours(roundedNow.Hour, 00, 1, async () => {
+            Scheduler.IntervalInHours(roundedNow.Hour, 0, 1, async () => {
                 await LogAsync(new LogMessage(LogSeverity.Info, "Scheduler", "Hourly scheduler fired."));
 
                 // Hourly functions
+                await _scheduler.HourlyCalendarUpdate(_client);
             });
 
             // Every day (starts from next day at 11:29 PM)
@@ -121,6 +136,7 @@ namespace Odin_Bot {
 
                 // Daily functions
                 await _scheduler.DailyModeratorReport(_client);
+                await _scheduler.ClearBeanRequests(_client);
             });
         }
 
@@ -140,6 +156,7 @@ namespace Odin_Bot {
             .AddSingleton<MiscService>()
             .AddSingleton<XivApiService>()
             .AddSingleton<SchedulerService>()
+            .AddSingleton<CalendarService>()
             .BuildServiceProvider();
     }
 }
